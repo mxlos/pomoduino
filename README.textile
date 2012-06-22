@@ -1,0 +1,24 @@
+h1. Pomoduino
+
+Por grupo Mexicali Open Source (mxlOS)!
+
+Pomoduino es un proyecto para crear un Pomodoro timer con Arduino.
+
+h2. Dependencias de compilacion
+
+* Actualizar Arduino IDE a al menos 1.0
+* "Obtener":https://github.com/mxlOS/pomoduino-libraries las librerias de LED, FSM y Button y agregarlas a tu directorio _sketchbook/libraries_
+
+h2. Filosofia del proyecto
+
+* Todo mundo esta invitado a colaborar
+* Se aceptan comentarios y sugerencias para mejorar (somos nuevos en Arduino!)
+* No hay prisa
+
+h2. Canales de comunicacion
+
+* "Discusion en Google Groups (principal)":https://groups.google.com/forum/?fromgroups#!topic/mxl-opensource/FWfU0E8KQvU
+* "Sitio web mxlopensource.org":http://mxlopensource.org/
+* "Facebook":http://www.facebook.com/groups/318240698253471/
+* "Twitter":https://twitter.com/#!/mxlOS
+
