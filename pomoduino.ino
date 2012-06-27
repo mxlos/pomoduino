@@ -3,6 +3,7 @@
 #include <LED.h>
 #include <FiniteStateMachine.h>
 #include <Button.h>
+#include "pitches.h"
 
 /*
   Pomoduino tiene 2 estados:
@@ -23,11 +24,29 @@ Button button = Button(8, BUTTON_PULLUP);
 
 LED led = LED(9);
 
+#define MELODY_SIZE 39
+
+int melody[] = {
+  NOTE_E6, NOTE_E6, NOTE_0, NOTE_E6, NOTE_0, NOTE_C6, NOTE_E6, NOTE_0, NOTE_G6, NOTE_0,
+  NOTE_0, NOTE_0, NOTE_G5, NOTE_0, NOTE_0, NOTE_0, NOTE_C6, NOTE_0, NOTE_0, NOTE_G5,
+  NOTE_0, NOTE_0, NOTE_E5, NOTE_0, NOTE_0, NOTE_A5, NOTE_0, NOTE_B5, NOTE_0, NOTE_AS5,
+  NOTE_A5, NOTE_0, NOTE_G5, NOTE_E6, NOTE_G6, NOTE_A6, NOTE_0, NOTE_F6, NOTE_G6
+};
+
+// note durations: 4 = quarter note, 8 = eighth note, etc.:
+int noteDurations[] = {
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 5, 5, 5
+};
+
+  
 // counter variable, hols number of button presses
 byte buttonPresses = 0;            
 
 // 25 minutos x 60 segundos = 1500
-int tiempoInicial = 5; 
+int tiempoInicial = 1; 
 
 // El estado del timer
 int segundosTranscurridos = 0;
@@ -38,6 +57,10 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Inicializando Pomoduino!");
   timer.every(1000, pomoduinoUpdateDisplay);
+  
+  
+ 
+  
 }
 
 //poor example, but then again; it's just an example
@@ -78,6 +101,7 @@ void pomoduinoStop() {
   // no hace nada por el momento ;)
   mostrarTimerFormateado(segundosTranscurridos);
   Serial.println("Stop!");
+  doSound();
 }
 
 /*-------------------------------------------------------------------------------
@@ -108,4 +132,23 @@ void mostrarTimerFormateado(int seconds) {
     Serial.print('0');
   }
   Serial.println(remaining); 
+}
+
+void doSound() {
+  // iterate over the notes of the melody:
+  for (int thisNote = 0; thisNote < MELODY_SIZE; thisNote++) {
+
+    // to calculate the note duration, take one second 
+    // divided by the note type.
+    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+    int noteDuration = 1000/noteDurations[thisNote];
+    tone(4, melody[thisNote],noteDuration);
+
+    // to distinguish the notes, set a minimum time between them.
+    // the note's duration + 30% seems to work well:
+    int pauseBetweenNotes = noteDuration * 1.30;
+    delay(pauseBetweenNotes);
+    // stop the tone playing:
+    noTone(4);
+  }
 }
