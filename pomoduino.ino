@@ -24,13 +24,17 @@ Button button = Button(8, BUTTON_PULLUP);
 
 LED led = LED(9);
 
-#define MELODY_SIZE 39
+
+const byte MELODY_SIZE = 47;
+const byte BUZZER_PIN = 4;
+int hayMusica = 1;
 
 int melody[] = {
   NOTE_E6, NOTE_E6, NOTE_0, NOTE_E6, NOTE_0, NOTE_C6, NOTE_E6, NOTE_0, NOTE_G6, NOTE_0,
   NOTE_0, NOTE_0, NOTE_G5, NOTE_0, NOTE_0, NOTE_0, NOTE_C6, NOTE_0, NOTE_0, NOTE_G5,
   NOTE_0, NOTE_0, NOTE_E5, NOTE_0, NOTE_0, NOTE_A5, NOTE_0, NOTE_B5, NOTE_0, NOTE_AS5,
-  NOTE_A5, NOTE_0, NOTE_G5, NOTE_E6, NOTE_G6, NOTE_A6, NOTE_0, NOTE_F6, NOTE_G6
+  NOTE_A5, NOTE_0, NOTE_G5, NOTE_E6, NOTE_G6, NOTE_A6, NOTE_0, NOTE_F6, NOTE_G6, NOTE_0,
+  NOTE_E6, NOTE_0, NOTE_C6, NOTE_D6, NOTE_B5, NOTE_0, NOTE_0
 };
 
 // note durations: 4 = quarter note, 8 = eighth note, etc.:
@@ -38,7 +42,8 @@ int noteDurations[] = {
   7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
   7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
   7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-  7, 7, 5, 5, 5
+  7, 7, 5, 5, 5, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7
 };
 
   
@@ -46,7 +51,7 @@ int noteDurations[] = {
 byte buttonPresses = 0;            
 
 // 25 minutos x 60 segundos = 1500
-int tiempoInicial = 1; 
+int tiempoInicial = 5; 
 
 // El estado del timer
 int segundosTranscurridos = 0;
@@ -57,10 +62,6 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Inicializando Pomoduino!");
   timer.every(1000, pomoduinoUpdateDisplay);
-  
-  
- 
-  
 }
 
 //poor example, but then again; it's just an example
@@ -69,7 +70,7 @@ void loop() {
     //increment buttonPresses and constrain it to [ 0, 1 ]
     buttonPresses = ++buttonPresses % NUMBER_OF_STATES; 
 
-    //Serial.println(buttonPresses);
+    Serial.println("Detected button press");
 
     switch (buttonPresses){
       case 0: pomoduinoStateMachine.transitionTo(On); break;
@@ -84,7 +85,10 @@ void loop() {
    Status = ON
 -------------------------------------------------------------------------------*/
 void pomoduinoStart() {
+  hayMusica = 0;
+  Serial.println("Prendido");
   segundosTranscurridos = tiempoInicial;
+  noTone(BUZZER_PIN);
 }
 
 // Este codigo se ejecuta cada vez que se actualiza la state machine 
@@ -101,6 +105,8 @@ void pomoduinoStop() {
   // no hace nada por el momento ;)
   mostrarTimerFormateado(segundosTranscurridos);
   Serial.println("Stop!");
+  hayMusica = 1;
+  led.off();
   doSound();
 }
 
@@ -108,8 +114,6 @@ void pomoduinoStop() {
    Status = Off
 -------------------------------------------------------------------------------*/
 void pomoduinoOff() {
-  led.off();
-
   segundosTranscurridos = 0;
 }
 
@@ -137,18 +141,20 @@ void mostrarTimerFormateado(int seconds) {
 void doSound() {
   // iterate over the notes of the melody:
   for (int thisNote = 0; thisNote < MELODY_SIZE; thisNote++) {
-
+    if (hayMusica == 0) {
+      break; 
+    }
     // to calculate the note duration, take one second 
     // divided by the note type.
     //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
     int noteDuration = 1000/noteDurations[thisNote];
-    tone(4, melody[thisNote],noteDuration);
+    tone(BUZZER_PIN, melody[thisNote],noteDuration);
 
     // to distinguish the notes, set a minimum time between them.
     // the note's duration + 30% seems to work well:
     int pauseBetweenNotes = noteDuration * 1.30;
     delay(pauseBetweenNotes);
     // stop the tone playing:
-    noTone(4);
+    noTone(BUZZER_PIN);
   }
 }
